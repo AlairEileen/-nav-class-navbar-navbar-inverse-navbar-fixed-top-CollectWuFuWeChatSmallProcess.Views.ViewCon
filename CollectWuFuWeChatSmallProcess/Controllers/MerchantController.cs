@@ -14,6 +14,8 @@ using Tools.Response;
 using Tools.Response.Json;
 using We7Tools;
 using We7Tools.Extend;
+using System.Net.Http.Headers;
+using ConfigData;
 
 namespace CollectWuFuWeChatSmallProcess.Controllers
 {
@@ -48,9 +50,7 @@ namespace CollectWuFuWeChatSmallProcess.Controllers
             return View(new ManageViewModel
             {
                 ProcessMiniInfo = companyModel.ProcessMiniInfo,
-                QRSendFee = companyModel.QRSendFee,
-                uniacid = companyModel.uniacid,
-                HasWeChatQRverifyFileName = companyModel.HasWeChatQRverifyFileName
+                Company = companyModel
             });
         }
         public IActionResult AccountInfo()
@@ -80,75 +80,76 @@ namespace CollectWuFuWeChatSmallProcess.Controllers
                 //throw;
             }
         }
-        /// <summary>
-        /// 设置服务费率
-        /// </summary>
-        /// <param name="qRSendFee"></param>
-        /// <returns></returns>
-        //public IActionResult SetQRSendFee(decimal qRSendFee)
-        //{
-        //    try
-        //    {
-        //        thisData.SetQRSendFee(HttpContext.Session.GetUniacID(), qRSendFee);
-        //        return this.JsonSuccessStatus();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        e.Save();
-        //        return this.JsonErrorStatus();
-        //    }
-        //}
 
-        //public IActionResult SetYTX()
-        //{
-        //    try
-        //    {
-        //        string json = new StreamReader(Request.Body).ReadToEnd();
-        //        YTXModel qiNiuModel = JsonConvert.DeserializeObject<YTXModel>(json);
-        //        qiNiuModel.AccountSID = qiNiuModel.AccountSID.Trim();
-        //        qiNiuModel.AuthToken = qiNiuModel.AuthToken.Trim();
-        //        qiNiuModel.AppID = qiNiuModel.AppID.Trim();
-        //        thisData.SetYTX(HttpContext.Session.GetUniacID(), qiNiuModel);
-        //        return this.JsonSuccessStatus();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        e.Save();
-        //        return this.JsonErrorStatus();
+        public IActionResult SetCompanyInfo()
+        {
+            try
+            {
+                using (var streamReader = new StreamReader(Request.Body))
+                {
+                    var json = streamReader.ReadToEnd();
+                    var company = JsonConvert.DeserializeObject<CompanyModel>(json);
+                    company.uniacid = HttpContext.Session.GetUniacID();
+                    thisData.SaveCompanyInfo(company);
+                }
+                return this.JsonSuccessStatus();
+            }
+            catch (Exception e)
+            {
+                e.Save();
+                return this.JsonErrorStatus();
+            }
+        }
+        public IActionResult SetQiNiu()
+        {
+            try
+            {
+                string json = new StreamReader(Request.Body).ReadToEnd();
+                QiNiuModel qiNiuModel = JsonConvert.DeserializeObject<QiNiuModel>(json);
+                thisData.SetQiNiu(HttpContext.Session.GetUniacID(), qiNiuModel);
+                return this.JsonSuccessStatus();
+            }
+            catch (Exception)
+            {
+                return this.JsonErrorStatus();
 
-        //    }
-        //}
+            }
+        }
 
-        //    public IActionResult SendOrder(string accountID)
-        //    {
-        //        try
-        //        {
-        //            string json = new StreamReader(Request.Body).ReadToEnd();
-        //            Order order = JsonConvert.DeserializeObject<Order>(json);
-        //            thisData.SendOrder(HttpContext.Session.GetUniacID(), new ObjectId(accountID), order);
-        //            return this.JsonSuccessStatus();
-        //        }
-        //        catch (Exception)
-        //        {
-        //            return this.JsonErrorStatus();
+        public IActionResult SavePic(PicType picType)
+        {
+            try
+            {
+                long size = 0;
+                var files = Request.Form.Files;
+                var file = files[0];
+                var filename = ContentDispositionHeaderValue
+                                      .Parse(file.ContentDisposition)
+                                      .FileName
+                                      .Trim('"');
+                var uniacid = HttpContext.Session.GetUniacID();
+                string saveDir = $@"{MainConfig.BaseDir}{MainConfig.TempDir}{uniacid}/";
+                if (!Directory.Exists(saveDir))
+                {
+                    Directory.CreateDirectory(saveDir);
+                }
+                string exString = filename.Substring(filename.LastIndexOf("."));
+                string saveName = Guid.NewGuid().ToString("N");
+                filename = $@"{saveDir}{saveName}{exString}";
 
-        //        }
-        //    }
-
-        //    public IActionResult PushWeChatQRRuleVerify()
-        //    {
-        //        try
-        //        {
-        //            var files = Request.Form.Files;
-        //            thisData.PushWeChatQRRuleVerify(HttpContext.Session.GetUniacID(), files[0], hostingEnvironment.ContentRootPath);
-        //            return this.JsonSuccessStatus();
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            e.Save();
-        //            return this.JsonErrorStatus();
-
-        //        }
-        //    }
+                size += file.Length;
+                using (FileStream fs = System.IO.File.Create(filename))
+                {
+                    file.CopyTo(fs);
+                    fs.Flush();
+                }
+                thisData.SavePic(picType, uniacid, filename);
+                return this.JsonSuccessStatus();
+            }
+            catch (Exception)
+            {
+                return this.JsonErrorStatus();
+            }
+        }
     }
 }

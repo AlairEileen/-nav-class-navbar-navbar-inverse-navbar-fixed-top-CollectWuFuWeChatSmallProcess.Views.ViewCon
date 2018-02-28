@@ -19,7 +19,7 @@ namespace ConfigData
         /// 微擎相关
         /// </summary>
         public const string 
-            We7ProjName = "move_car",
+            We7ProjName = "ykt_ycs",
             We7Domain = "https://"+(MainConfig.IsDev?"dev":"xcx")+".360yingketong.com/addons/",
             We7DataGetUrl = We7Domain + We7ProjName + "/db_select.php?key=5a5edafbed06c11a1829a4f6&uniacid=";
 

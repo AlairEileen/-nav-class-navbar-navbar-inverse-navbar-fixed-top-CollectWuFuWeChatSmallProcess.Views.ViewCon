@@ -9,74 +9,184 @@
 <div class="jumbotron">
     <h1>@RoutType.系统管理.ToString()</h1>
 </div>
-<h2>设置云迅信息</h2>
+<h2>设置七牛云信息</h2>
 <h6>
-    <a href="http://www.ytx.net" class="btn btn-link">点此注册</a>
+    注意：<label class="text-danger">
+        存储空间必须是公开的，域名必须加上前缀（列：http://p20mykfl0.bkt.clouddn.com）
+    </label><a href="https://www.qiniu.com" class="btn btn-link">点此注册</a>
 </h6>
 <hr />
-@*<div class="row">
+<div class="row">
     <div class="col-sm-3 col-xs-6">
-        <input class="form-control" id="AccountSID" value="@Model.YTX.AccountSID" type="text" placeholder="填写 ACCOUNT SID" />
+        <input class="form-control" id="bucket" value="@(Model.Company.QiNiuModel != null ? Model.Company.QiNiuModel.Bucket : "")" type="text" placeholder="填写储存空间名称" />
     </div>
     <div class="col-sm-3 col-xs-6">
-        <input class="form-control" id="AuthToken" value="@Model.YTX.AuthToken" type="text" placeholder="填写 AUTH TOKEN" />
+        <input class="form-control" id="doMain" value="@(Model.Company.QiNiuModel != null ? Model.Company.QiNiuModel.DoMain : "")" type="text" placeholder="填写储存空间对应域名" />
     </div>
     <div class="col-sm-3 col-xs-6">
-        <input class="form-control" id="AppID" value="@Model.YTX.AppID" type="text" placeholder="填写 应用ID" />
+        <input class="form-control" id="accessKey" value="@(Model.Company.QiNiuModel != null ? Model.Company.QiNiuModel.AccessKey : "")" type="text" placeholder="填写密钥 AccessKey" />
     </div>
     <div class="col-sm-3 col-xs-6">
-
-        <label>
-            <input type="checkbox" @(Model.YTX.IsTestApp ? "checked" : "") id="IsTestApp" />
-            AppID为测试AppID
-        </label>
+        <input class="form-control" id="secretKey" value="@(Model.Company.QiNiuModel != null ? Model.Company.QiNiuModel.SecretKey : "")" type="text" placeholder="填写密钥 SecretKey" />
     </div>
 
 </div>
 <br />
 <div class="row">
     <div class="col-xs-6 col-sm-3 pull-right">
-        <button class="btn btn-primary col-xs-12" onclick="setYTX()">提交云迅信息设置</button>
-    </div>
-</div>
-<br />
-<br />*@
-<h2>小程序交易设置</h2>
-<hr />
-<div class="row">
-    <div class="col-sm-4 col-xs-6">
-        <label>设置二维码寄送费用</label>
-    </div>
-    <div class="col-sm-4 col-xs-6">
-        <input class="form-control" id="serviceRate" value="@Model.QRSendFee" type="text" placeholder="填写二维码寄送费用" />
-    </div>
-    <div class="col-sm-4 col-xs-6">
-        <button class="btn btn-primary" onclick="setServiceRate()">提交二维码寄送费用设置</button>
+        <button class="btn btn-primary col-xs-12" onclick="setQiNiu()">提交七牛云信息设置</button>
     </div>
 </div>
 <br />
 <br />
-<h2>小程序二维码扫描设置</h2>
-<hr />
-<div class="row">
-    <div class="col-sm-12 col-xs-12">
-        <label>微信二维码规则:<span class="text-danger">@(Context.Request.Scheme+"://"+ Context.Request.Host.ToString()+Context.Request.PathBase)/account/GetAccountInfo?uniacid=@Model.uniacid</span></label>
-    </div>
-</div>
-<div class="row">
-    <div class="col-sm-4 col-xs-6">
-        <label>上传微信二维码验证文件（<span class="text-danger">类似：uEZMcM24BZ.txt</span>）</label>
-    </div>
 
-    <div class="col-sm-4 col-xs-6">
-        <input type="file" onchange="loadFile(this)" class="hidden" id="verifyFile" />
+<h2>设置小程序相关图片</h2>
+<h3>卡片亮色</h3>
+<div>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,1)" class="hidden" id="k1" />
         <div class="input-append">
-            <a class="btn btn-default" onclick="$('input[id=verifyFile]').click();">选择 微信二维码验证文件</a>
-            <span>未选择（必须选择）</span>
+            <a class="btn btn-default" onclick="$('input[id=k1]').click();">选择 左侧第1个图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.福星)?"已上传":"未上传")</span>
         </div>
     </div>
-    <div class="col-sm-4 col-xs-6">
-        <button class="btn btn-primary" onclick="uploadCert()">@(Model.HasWeChatQRverifyFileName? "已上传 重新提交微信二维码验证文件" : "提交微信二维码验证文件")</button>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,2)" class="hidden" id="k2" />
+        <div class="input-append">
+            <a class="btn btn-default" onclick="$('input[id=k2]').click();">选择 左侧第2个图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.禄星) ? "已上传" : "未上传")</span>
+
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,3)" class="hidden" id="k3" />
+        <div class="input-append">
+            <a class="btn btn-default" onclick="$('input[id=k3]').click();">选择 左侧第3个图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.寿星) ? "已上传" : "未上传")</span>
+
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,4)" class="hidden" id="k4" />
+        <div class="input-append">
+            <a class="btn btn-default" onclick="$('input[id=k4]').click();">选择 左侧第4个图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.喜神) ? "已上传" : "未上传")</span>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,5)" class="hidden" id="k5" />
+        <div class="input-append">
+            <a class="btn btn-default" onclick="$('input[id=k5]').click();">选择 左侧第5个图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.财神) ? "已上传" : "未上传")</span>
+        </div>
+    </div>
+</div>
+<br style="clear:both;" />
+<h3>卡片灰色</h3>
+<div>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,-1)" class="hidden" id="k10" />
+        <div class="input-append">
+            <a class="btn btn-default" onclick="$('input[id=k10]').click();">选择 左侧第1个图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.福星_黑) ? "已上传" : "未上传")</span>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,-2)" class="hidden" id="k20" />
+        <div class="input-append">
+            <a class="btn btn-default" onclick="$('input[id=k20]').click();">选择 左侧第2个图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.禄星_黑) ? "已上传" : "未上传")</span>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,-3)" class="hidden" id="k30" />
+        <div class="input-append">
+            <a class="btn btn-default" onclick="$('input[id=k30]').click();">选择 左侧第3个图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.寿星_黑) ? "已上传" : "未上传")</span>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,-4)" class="hidden" id="k40" />
+        <div class="input-append">
+            <a class="btn btn-default" onclick="$('input[id=k40]').click();">选择 左侧第4个图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.喜神_黑) ? "已上传" : "未上传")</span>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,-5)" class="hidden" id="k50" />
+        <div class="input-append">
+            <a class="btn btn-default" onclick="$('input[id=k50]').click();">选择 左侧第5个图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.财神_黑) ? "已上传" : "未上传")</span>
+        </div>
+    </div>
+</div>
+
+<br style="clear:both;" />
+<h3>其他图片</h3>
+<div>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,10)" class="hidden" id="p10" />
+        <div class="input-append">
+            <a class="btn btn-default" onclick="$('input[id=p10]').click();">选择 小程序分享图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.小程序分享) ? "已上传" : "未上传")</span>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,20)" class="hidden" id="p20" />
+        <div class="input-append">
+            <a class="btn btn-default" onclick="$('input[id=p20]').click();">选择 分享成功图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.分享成功) ? "已上传" : "未上传")</span>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,30)" class="hidden" id="p30" />
+        <div class="input-append">
+            <a class="btn btn-default" onclick="$('input[id=p30]').click();">选择 头部图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.头部) ? "已上传" : "未上传")</span>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-3">
+        <input type="file" onchange="loadFile(this,40)" class="hidden" id="p40" />
+        <div class="input-append">
+            <a class="btn btn-default" onclick="$('input[id=p40]').click();">选择 二维码图片</a>
+            <span>@(Model.Company.ProjPics.Exists(x => x.Type == PicType.二维码) ? "已上传" : "未上传")</span>
+        </div>
+    </div>
+</div>
+
+
+<br style="clear:both;" />
+<br />
+<h2>设置公司信息</h2>
+<hr />
+<div class="row">
+    <div class="col-sm-3 col-xs-6">
+        <label>公司电话</label>
+    </div>
+    <div class="col-sm-3 col-xs-6">
+        <input class="form-control" id="phone" value="@Model.Company.Phone" type="text" placeholder="公司电话" />
+    </div>
+    <div class="col-sm-3 col-xs-6">
+        <label>公司地址</label>
+    </div>
+    <div class="col-sm-3 col-xs-6">
+        <input class="form-control" id="address" value="@Model.Company.Address" type="text" placeholder="公司地址" />
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-sm-12 col-xs-12">
+        <label>关于我们</label>
+    </div>
+    <div class="col-sm-12 col-xs-12">
+        <textarea class="form-control" id="about" rows="5" placeholder="关于我们">@Model.Company.About</textarea>
+    </div>
+
+</div>
+<br />
+<div class="row">
+    <div class="col-sm-4 col-xs-6 pull-right">
+        <button class="btn btn-primary pull-right" onclick="setCompany()">提交公司设置</button>
     </div>
 </div>
 <br />
@@ -91,16 +201,10 @@
 <br />
 <br />
 <script>
-    function loadFile(o, maxLength) {
-        if (maxLength != undefined && o.files.length > maxLength) {
-            alert("最多可以选择" + maxLength + "张");
-            return;
-        }
-        var text = o.files.length == 1 ? o.files[0].name : o.files.length + "张图片";
-        $(o).next().find("span").html(text);
-    }
-      function uploadCert() {
-          var planGoodsListPic = $("#verifyFile").get(0);
+        function loadFile(o, type) {
+            var text = o.files.length == 1 ? o.files[0].name : o.files.length + "张图片";
+            $(o).next().find("span").html(text);
+              var planGoodsListPic = $(o).get(0);
         var files = planGoodsListPic.files;
         var data = new FormData();
         for (var i = 0; i < files.length; i++) {
@@ -108,68 +212,155 @@
         }
         $.ajax({
             type: "POST",
-            url: "@Context.Request.PathBase/Merchant/PushWeChatQRRuleVerify",
+            url: "SavePic?picType="+type,
             contentType: false,
             processData: false,
             data: data,
             success: function (message) {
-                var data = JSON.parse(message);
-                if (data.StatusCode == @((int)Tools.Response.ResponseStatus.请求成功)) {
-                            alert("设置成功");
-                         } else {
-                           alert("设置失败");
-                         }
+                //var data = JSON.parse(message);
+                 var data = message;
+                if (data.StatusCode==(@((int)Tools.Response.ResponseStatus.请求成功))) {
+                    pushPlanGoods(data.JsonData);
+                }
             },
             error: function () {
                 alert("There was error uploading files!");
             }
         });
-    }
-
-    function setYTX() {
-        var AccountSID = $("#AccountSID").val();
-        var AuthToken = $("#AuthToken").val();
-        var AppID = $("#AppID").val();
-        var IsTestApp = $("#IsTestApp").is(":checked");
-        var json = {
-            AccountSID: AccountSID,
-            AuthToken: AuthToken,
-            AppID: AppID,
-            IsTestApp: IsTestApp
-        };
-         $.ajax({
-                    type: "post",
-                    url: "@Context.Request.PathBase/Merchant/SetYTX",
-                    contentType: "application/json; charset=utf-8",
-                    data: JSON.stringify(json),
-                    dataType: "json",
-                    success: function (message) {
-                       if (message.StatusCode == @((int)Tools.Response.ResponseStatus.请求成功)) {
-                            alert("设置成功");
-                         } else {
-                           alert("设置失败");
-                         }
-                    },
-                    error: function (message) {
-                        alert("设置失败");
-                    }
-                });
-
-
-    }
-    function setServiceRate() {
-        var serviceRate = $("#serviceRate").val();
-        if ($.trim(serviceRate).length == 0) {
-            return;
         }
-        $.getJSON("@Context.Request.PathBase/Merchant/SetQRSendFee", { qRSendFee: serviceRate}, function (data, status) {
-             if (data.StatusCode == @((int)Tools.Response.ResponseStatus.请求成功)) {
-                            alert("设置成功");
-                         } else {
-                           alert("设置失败");
-                         }
-         });
+        function setQiNiu() {
+            var bucket = $("#bucket").val();
+            var doMain = $("#doMain").val();
+            var accessKey = $("#accessKey").val();
+            var secretKey = $("#secretKey").val();
+            var json = {
+                AccessKey: accessKey,
+                SecretKey: secretKey,
+                Bucket: bucket,
+                DoMain: doMain
+            };
+            $.ajax({
+                type: "post",
+                /**/
+                url: "@Context.Request.PathBase/Merchant/SetQiNiu",
+        /**/
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(json),
+        dataType: "json",
+        success: function (message) {
+            /**/
+            if (message.StatusCode == @((int)Tools.Response.ResponseStatus.请求成功)) {
+            /**/
+            alert("设置成功");
+        } else {
+            alert("设置失败");
+        }
+    },
+    error: function (message) {
+        alert("设置失败");
     }
+});
+
+
+}
+
+function uploadCert() {
+var planGoodsListPic = $("#verifyFile").get(0);
+var files = planGoodsListPic.files;
+var data = new FormData();
+for (var i = 0; i < files.length; i++) {
+    data.append(files[i].name, files[i]);
+}
+$.ajax({
+    type: "POST",
+    /**/
+    url: "@Context.Request.PathBase/Merchant/PushWeChatQRRuleVerify",
+        /**/
+        contentType: false,
+        processData: false,
+        data: data,
+        success: function (message) {
+            var data = JSON.parse(message);
+            /**/
+            if (data.StatusCode == @((int)Tools.Response.ResponseStatus.请求成功)) {
+            /**/
+            alert("设置成功");
+        } else {
+            alert("设置失败");
+        }
+    },
+    error: function () {
+        alert("There was error uploading files!");
+    }
+});
+}
+
+function setYTX() {
+var AccountSID = $("#AccountSID").val();
+var AuthToken = $("#AuthToken").val();
+var AppID = $("#AppID").val();
+var IsTestApp = $("#IsTestApp").is(":checked");
+var json = {
+    AccountSID: AccountSID,
+    AuthToken: AuthToken,
+    AppID: AppID,
+    IsTestApp: IsTestApp
+};
+$.ajax({
+    type: "post",
+    /**/
+    url: "@Context.Request.PathBase/Merchant/SetYTX",
+        /**/
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(json),
+        dataType: "json",
+        success: function (message) {
+            /**/
+            if (message.StatusCode == @((int)Tools.Response.ResponseStatus.请求成功)) {
+            /**/
+            alert("设置成功");
+        } else {
+            alert("设置失败");
+        }
+    },
+    error: function (message) {
+        alert("设置失败");
+    }
+});
+
+
+}
+function setCompany() {
+var phone = $("#phone").val();
+var address = $("#address").val();
+var about = $("#about").val();
+var json = {
+    Address: address,
+    About: about,
+    Phone: phone
+};
+$.ajax({
+    type: "post",
+    /**/
+    url: "@Context.Request.PathBase/Merchant/SetCompanyInfo",
+        /**/
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(json),
+        dataType: "json",
+        success: function (message) {
+            /**/
+            if (message.StatusCode == @((int)Tools.Response.ResponseStatus.请求成功)) {
+            /**/
+            alert("设置成功");
+        } else {
+            alert("设置失败");
+        }
+    },
+    error: function (message) {
+        alert("设置失败");
+    }
+});
+}
 
 
 </script>

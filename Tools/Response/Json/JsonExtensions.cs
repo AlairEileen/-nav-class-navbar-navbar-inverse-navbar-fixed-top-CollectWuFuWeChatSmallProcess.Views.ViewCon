@@ -84,5 +84,30 @@ namespace Tools.Response.Json
         {
             return controller.Json(new JsonResponse() { StatusCode = actionParams, Message = actionParams.ToString() }, defaultJSS);
         }
+
+        /// <summary>
+        /// jsonResponse convert to jsonResult
+        /// </summary>
+        /// <param name="obj">object</param>
+        /// <param name="controller">current controller</param>
+        /// <returns></returns>
+        public static Microsoft.AspNetCore.Mvc.JsonResult ToJsonSuccess(this object obj, Microsoft.AspNetCore.Mvc.Controller controller, JsonSerializerSettings serializerSettings = null)
+        {
+            var resp = new JsonResponse1<object> { JsonData = obj };
+            return controller.JsonSuccess(resp,serializerSettings);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="controller"></param>
+        /// <param name="limitParams"></param>
+        /// <returns></returns>
+        public static Microsoft.AspNetCore.Mvc.JsonResult ToJsonSuccessWithLimit(this object obj, Microsoft.AspNetCore.Mvc.Controller controller, string[] limitParams = null)
+        {
+            var resp = new JsonResponse1<object> { JsonData = obj };
+            return controller.JsonSuccessWithLimit(resp,limitParams);
+        }
     }
 }

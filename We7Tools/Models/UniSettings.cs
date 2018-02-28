@@ -27,15 +27,14 @@ namespace We7Tools.Models
         }
         internal void WriteConfig(ProcessMiniConfig processMiniConfig)
         {
-            var payment = jsonObj["payment"];
-            if (payment != null)
+            JToken payment;
+            if (jsonObj.TryGetValue(nameof(payment), out payment))
             {
-                var wechat = payment["wechat"];
-                if (wechat != null)
+                JToken wechat;
+                if (payment.Next != null && ((JObject)payment).TryGetValue(nameof(wechat), out wechat))
                 {
                     processMiniConfig.MCHID = wechat["mchid"] == null ? null : wechat["mchid"].ToString();
                     processMiniConfig.KEY = wechat["signkey"] == null ? null : wechat["signkey"].ToString();
-
                 }
             }
             processMiniConfig.APPID = jsonObj["key"] == null ? null : jsonObj["key"].ToString();
@@ -71,9 +70,12 @@ namespace We7Tools.Models
 
         private static void WriteCertFileConfig(string uniacid, ProcessMiniConfig pmc)
         {
-            BsonDocument document = new MongoDBTool().GetMongoCollection<BsonDocument>("CompanyModel").Find(Builders<BsonDocument>.Filter.Eq("uniacid", uniacid)).FirstOrDefault();
-            var cfn = document.GetValue("CertFileName").ToString();
-            pmc.SSLCERT_PATH = $"{MainConfig.BaseDir}{MainConfig.CertsDir}/{uniacid}/{cfn}";
+            var document = new MongoDBTool().GetMongoCollection<BsonDocument>("CompanyModel").Find(Builders<BsonDocument>.Filter.Eq("uniacid", uniacid)).FirstOrDefault();
+            BsonValue cfn;
+            if (document!=null&&document.TryGetValue("CertFileName", out cfn))
+            {
+                pmc.SSLCERT_PATH = $"{MainConfig.BaseDir}{MainConfig.CertsDir}/{uniacid}/{cfn.ToString()}";
+            }
         }
     }
 

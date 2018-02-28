@@ -9,7 +9,7 @@ namespace ConfigData
         /// <summary>
         /// 是否为开发版
         /// </summary>
-        public const bool IsDev = false;
+        public const bool IsDev = true;
 
         /// <summary>
         /// 项目相关参数

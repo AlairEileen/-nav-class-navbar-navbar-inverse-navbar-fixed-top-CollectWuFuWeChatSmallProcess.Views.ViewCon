@@ -14,7 +14,7 @@ namespace CollectWuFuWeChatSmallProcess.AppData
 {
     public class MerchantData : BaseData<CompanyModel>
     {
-     
+
 
 
         internal List<AccountModel> GetAccountList(string uniacid)
@@ -23,7 +23,7 @@ namespace CollectWuFuWeChatSmallProcess.AppData
             return list;
         }
 
-    
+
 
         internal CompanyModel GetCompanyModel(string uniacid)
         {
@@ -31,7 +31,62 @@ namespace CollectWuFuWeChatSmallProcess.AppData
             return companyModel;
         }
 
-    
+        internal void SaveCompanyInfo(CompanyModel company)
+        {
+            var companyOld = GetCompanyModel(company.uniacid);
+            if (companyOld == null)
+            {
+                collection.InsertOne(company);
+            }
+            else
+            {
+                collection.UpdateOne(x => x.uniacid.Equals(company.uniacid), Builders<CompanyModel>
+                    .Update.Set(x => x.Phone, company.Phone)
+                    .Set(x => x.About, company.About)
+                    .Set(x => x.Address, company.Address));
+            }
+        }
 
-      }
+        internal void SetQiNiu(string uniacid, QiNiuModel qiNiuModel)
+        {
+            var companyCollection = mongo.GetMongoCollection<CompanyModel>();
+            var company = companyCollection.Find(x => x.uniacid.Equals(uniacid)).FirstOrDefault();
+            if (company == null)
+            {
+                companyCollection.InsertOne(new CompanyModel() { QiNiuModel = qiNiuModel, uniacid = uniacid });
+            }
+            companyCollection.UpdateOne(x => x.uniacid.Equals(uniacid), Builders<CompanyModel>.Update.Set(x => x.QiNiuModel, qiNiuModel));
+        }
+
+        internal void SavePic(PicType picType, string uniacid, string filename)
+        {
+            var company = GetCompanyModel(uniacid);
+            if (company.QiNiuModel == null)
+            {
+                throw new Exception("error");
+            }
+            company.QiNiuModel.UploadFile(filename);
+            if (company.ProjPics==null)
+            {
+                company.ProjPics = new List<ProjPic>();
+            }
+            if (company.ProjPics.Exists(x => x.Type == picType))
+            {
+                company.QiNiuModel.DeleteFile(company.ProjPics.Find(x => x.Type == picType).Url);
+                company.ProjPics.Find(x => x.Type == picType).Url = filename;
+            }
+            else
+            {
+                company.ProjPics.Add(new ProjPic
+                {
+                    Type = picType,
+                    Url = filename
+                });
+            }
+            collection.UpdateOne(x => x.uniacid.Equals(uniacid),
+                Builders<CompanyModel>
+                .Update
+                .Set(x => x.ProjPics, company.ProjPics));
+        }
+    }
 }

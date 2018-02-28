@@ -48,13 +48,105 @@ namespace CollectWuFuWeChatSmallProcess.AppData
         internal void SaveAccountInfo(AccountModel account)
         {
             collection.UpdateOne(
-                x=>x.AccountID.Equals(account.AccountID)
-                &&x.uniacid.Equals(account.uniacid),
+                x => x.AccountID.Equals(account.AccountID)
+                && x.uniacid.Equals(account.uniacid),
                 Builders<AccountModel>.Update
-                .Set(x=>x.Info,account.Info)
-                .Set(x=>x.Gender,account.Gender)
-                .Set(x=>x.AccountName,account.AccountName)
-                .Set(x=>x.AccountPhoneNumber,account.AccountPhoneNumber));
+                .Set(x => x.Info, account.Info)
+                .Set(x => x.Gender, account.Gender)
+                .Set(x => x.AccountName, account.AccountName)
+                .Set(x => x.AccountPhoneNumber, account.AccountPhoneNumber));
+        }
+
+        internal void ShareSuccess(string uniacid, ObjectId accountID)
+        {
+            var account = GetModelByIDAndUniacID(accountID, uniacid);
+            if (account != null && account.CanShareTimes > 0)
+            {
+                account.CanShareTimes--;
+                account.CanOpenJackTimes++;
+                collection.UpdateOne(
+                    x => x.AccountID.Equals(account.AccountID) && x.uniacid.Equals(account.uniacid),
+                    Builders<AccountModel>.Update.Set(x => x.CanOpenJackTimes, account.CanOpenJackTimes)
+                    .Set(x => x.CanShareTimes, account.CanShareTimes));
+            }
+            else
+            {
+                throw new Exception("error");
+            }
+        }
+
+        Dictionary<JackType, int> collect = new Dictionary<JackType, int>{
+        { JackType.喜神,10},
+        { JackType.寿星,20},
+        { JackType.禄星,40},
+        { JackType.福星,80},
+        { JackType.财神,160}
+        };
+
+
+        public JackType RandomJack()
+        {
+            var random = new Random();
+            JackType jack = JackType.喜神;
+            while (true)
+            {
+                var n1 = random.Next(1, collect[JackType.喜神]);
+                var n2 = random.Next(1, collect[JackType.寿星]);
+                var n3 = random.Next(1, collect[JackType.禄星]);
+                var n4 = random.Next(1, collect[JackType.福星]);
+                var n5 = random.Next(1, collect[JackType.财神]);
+
+                if (n1 == (int)JackType.喜神)
+                {
+                    jack = JackType.喜神;
+                    break;
+                }
+                if (n2 == (int)JackType.寿星)
+                {
+                    jack = JackType.寿星;
+                    break;
+                }
+                if (n3 == (int)JackType.禄星)
+                {
+                    jack = JackType.禄星;
+                    break;
+                }
+                if (n4 == (int)JackType.福星)
+                {
+                    jack = JackType.福星;
+                    break;
+                }
+                if (n5 == (int)JackType.财神)
+                {
+                    jack = JackType.财神;
+                    break;
+                }
+            }
+            return jack;
+        }
+
+        internal JackType OpenJack(string uniacid, ObjectId objectId)
+        {
+
+            var account = GetAccountInfo(uniacid, objectId);
+            if (account.CanOpenJackTimes<=0)
+            {
+                throw new Exception("抽奖失败");
+            }
+            var jack = RandomJack();
+            foreach (var item in account.Collect)
+            {
+                if (item.JackType==jack)
+                {
+                    item.HasCount++;
+                }
+            }
+            collection.UpdateOne(x => x.AccountID.Equals(account.AccountID) && x.uniacid.Equals(account.uniacid),
+                    Builders<AccountModel>.Update
+                    .Set(x=>x.Collect,account.Collect)
+                    .Set(x=>x.CanOpenJackTimes,account.CanOpenJackTimes-1));
+
+            return jack;
         }
     }
 }

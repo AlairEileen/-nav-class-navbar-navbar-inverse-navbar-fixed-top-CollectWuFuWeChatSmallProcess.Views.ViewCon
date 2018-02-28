@@ -44,7 +44,7 @@ namespace CollectWuFuWeChatSmallProcess.Controllers
                     stautsCode = ResponseStatus.请求成功;
                 }
                 responseModel.StatusCode = stautsCode;
-                var param = new string[] { "JsonData", "AccountID"};
+                var param = new string[] { "JsonData", "AccountID" };
                 return this.JsonSuccessWithLimit(responseModel, param);
             }
             catch (Exception e)
@@ -60,7 +60,7 @@ namespace CollectWuFuWeChatSmallProcess.Controllers
         /// <param name="uniacid">商户识别ID</param>
         /// <param name="accountID">用户ID</param>
         /// <returns></returns>
-       public IActionResult GetAccountInfo(string uniacid,string accountID)
+        public IActionResult GetAccountInfo(string uniacid, string accountID)
         {
             try
             {
@@ -75,7 +75,7 @@ namespace CollectWuFuWeChatSmallProcess.Controllers
                     "Info",
                     "Address",
                     "Brief" };
-                return this.JsonSuccessWithLimit(response,param);
+                return this.JsonSuccessWithLimit(response, param);
             }
             catch (Exception e)
             {
@@ -83,6 +83,73 @@ namespace CollectWuFuWeChatSmallProcess.Controllers
                 return this.JsonErrorStatus();
             }
         }
+
+        /// <summary>
+        /// 获取我的收集列表
+        /// </summary>
+        /// <param name="uniacid">商户识别ID</param>
+        /// <param name="accountID">用户ID</param>
+        /// <returns></returns>
+        public IActionResult GetAccountCollect(string uniacid, string accountID)
+        {
+            try
+            {
+                var account = thisData.GetAccountInfo(uniacid, new ObjectId(accountID));
+                var response = new JsonResponse1<AccountModel> { JsonData = account };
+                var param = new string[] {
+                    "JsonData",
+                    "CanOpenJackTimes",
+                    "JackType",
+                    "HasCount",
+                    "CanShareTimes",
+                    "Collect" };
+                return this.JsonSuccessWithLimit(response, param);
+            }
+            catch (Exception e)
+            {
+                e.Save();
+                return this.JsonErrorStatus();
+            }
+        }
+        /// <summary>
+        /// 分享成功接口
+        /// </summary>
+        ///<param name="uniacid">商户识别ID</param>
+        ///<param name="accountID">用户ID</param>
+        /// <returns></returns>
+        public IActionResult ShareSuccess(string uniacid, string accountID)
+        {
+            try
+            {
+                thisData.ShareSuccess(uniacid, new ObjectId(accountID));
+                return this.JsonSuccessStatus();
+            }
+            catch (Exception e)
+            {
+                e.Save();
+                return this.JsonErrorStatus();
+            }
+        }
+        /// <summary>
+        /// 开奖
+        /// </summary>
+        /// <param name="uniacid"></param>
+        /// <param name="accountID"></param>
+        /// <returns></returns>
+        public IActionResult OpenJack(string uniacid, string accountID)
+        {
+            try
+            {
+                var jack = thisData.OpenJack(uniacid, new ObjectId(accountID));
+                return jack.ToJsonSuccess(this);
+            }
+            catch (Exception e)
+            {
+                e.Save();
+                return this.JsonErrorStatus();
+            }
+        }
+
 
         /// <summary>
         /// 保存个人信息
@@ -93,7 +160,6 @@ namespace CollectWuFuWeChatSmallProcess.Controllers
         /// "AccountName":"",
         /// "AccountPhoneNumber":"",
         /// "Gender":"",
-        /// "AccountAvatar":"",
         /// "Info":{
         /// "Address":"",
         /// "Brief":""
